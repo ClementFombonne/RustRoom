@@ -1,0 +1,21 @@
+[package]
+name = "rustroom"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+directories = "*"
+eframe = "*"
+egui = "*"
+egui_extras = {version="*", features=["all_loaders"]}
+image = {version="*", features=["png", "jpeg", "tiff"]}
+rusqlite = {version="*", features=["bundled"]}
+serde = {version="*", features=["derive"]}
+serde_json = "*"
+chrono = "*"
+egui-file-dialog = "*"
+kamadak-exif = "*"
+
+[profile.dev.package.image]
+opt-level = 3
+

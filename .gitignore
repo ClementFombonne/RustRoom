@@ -1,0 +1,10 @@
+# build file
+target/
+rustroom.db
+previews/
+
+
+# direnv
+.envrc
+.direnv
+
