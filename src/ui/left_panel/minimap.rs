@@ -1,4 +1,4 @@
-use crate::ui::scene::ImageViewer;
+use crate::ui::central_panel::scene::ImageViewer;
 use egui::{Color32, Rect, Stroke, StrokeKind, Vec2, emath::TSTransform};
 
 pub fn show(ui: &mut egui::Ui, viewer: &mut ImageViewer, image_path: &str) {

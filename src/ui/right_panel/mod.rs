@@ -1,7 +1,7 @@
 pub mod basic_edit;
 pub mod histogram;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct PhotoAdjustments {
     // White Balance
     pub temperature: i32, // 0 to 100 (50 is neutral)

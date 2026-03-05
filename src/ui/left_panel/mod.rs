@@ -1,7 +1,7 @@
 pub mod metadata;
 pub mod minimap;
 
-use crate::ui::scene::ImageViewer;
+use crate::ui::central_panel::scene::ImageViewer;
 
 pub fn show(
     ctx: &egui::Context,

@@ -9,6 +9,117 @@ pub fn create_exposure_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, 
     move |r, g, b| (r * multiplier, g * multiplier, b * multiplier)
 }
 
+pub fn create_contrast_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    // A slight curve (powf) makes the slider feel more natural and less aggressive
+    let factor = (slider_val as f32 / 50.0).powf(1.2);
+
+    move |r, g, b| {
+        (
+            (r - 0.5) * factor + 0.5,
+            (g - 0.5) * factor + 0.5,
+            (b - 0.5) * factor + 0.5,
+        )
+    }
+}
+
+/// Returns a closure that applies Saturation
+pub fn create_saturation_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let factor = slider_val as f32 / 50.0;
+
+    move |r, g, b| {
+        // Find the absolute grayscale value of the pixel
+        let lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        (
+            lum + (r - lum) * factor,
+            lum + (g - lum) * factor,
+            lum + (b - lum) * factor,
+        )
+    }
+}
+
+pub fn create_temperature_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let temp_shift = (slider_val as f32 - 50.0) / 250.0;
+    move |r, g, b| {
+        let r = r + temp_shift;
+        let g = g + (temp_shift * 0.5);
+        let b = b - temp_shift;
+        (r, g, b)
+    }
+}
+
+pub fn create_tint_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let tint_shift = (slider_val as f32 - 50.0) / 250.0;
+    move |r, g, b| {
+        let r = r + tint_shift;
+        let g = g - (tint_shift * 1.0);
+        let b = b + tint_shift;
+
+        (r, g, b)
+    }
+}
+
+pub fn create_texture_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let intensity = (slider_val as f32 - 50.0) / 100.0;
+
+    move |r, g, b| {
+        // A simple approximation of texture enhancement using an S-Curve
+        // focused on the luminance differences.
+        let l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        let factor = 1.0 + intensity * (1.0 - (2.0 * l - 1.0).abs());
+
+        (r * factor, g * factor, b * factor)
+    }
+}
+
+/// Clarity: Mid-tone contrast adjustment
+pub fn create_clarity_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let intensity = (slider_val as f32 - 50.0) / 50.0;
+
+    move |r, g, b| {
+        let l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        // Target the mid-tones (around 0.5)
+        let midtone_mask = 1.0 - (2.0 * l - 1.0).abs();
+        let factor = 1.0 + intensity * midtone_mask * (l - 0.5);
+
+        (r * factor, g * factor, b * factor)
+    }
+}
+
+/// Dehaze: Combined contrast, saturation, and black-level shift
+pub fn create_dehaze_edit(slider_val: i32) -> impl Fn(f32, f32, f32) -> (f32, f32, f32) {
+    let intensity = (slider_val as f32 - 50.0) / 100.0;
+
+    move |r, g, b| {
+        // 1. Calculate luminance
+        let l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        // 2. Black point shift: We pull the floor down based on intensity
+        // This is more aggressive in the shadows (where haze is most visible)
+        let black_shift = intensity * (1.0 - l).powf(2.0);
+
+        let mut nr = r - black_shift;
+        let mut ng = g - black_shift;
+        let mut nb = b - black_shift;
+
+        // 3. Contrast boost: Expand the remaining range
+        let contrast_factor = 1.0 + intensity * 0.5;
+        nr = (nr - 0.5) * contrast_factor + 0.5;
+        ng = (ng - 0.5) * contrast_factor + 0.5;
+        nb = (nb - 0.5) * contrast_factor + 0.5;
+
+        // 4. Saturation boost: Haze kills color, so we bring it back
+        let nl = 0.2126 * nr + 0.7152 * ng + 0.0722 * nb;
+        let sat_factor = 1.0 + intensity * 0.8;
+
+        (
+            nl + (nr - nl) * sat_factor,
+            nl + (ng - nl) * sat_factor,
+            nl + (nb - nl) * sat_factor,
+        )
+    }
+}
+
 // --- THE MASKS ---
 
 /// A universal mask that applies the edit at 100% everywhere
