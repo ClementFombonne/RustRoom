@@ -2,6 +2,8 @@
 
 RustRoom is a lightweight, non-destructive photo management and editing application built entirely in Rust.
 
+![RustRoom App](assets/rustroom.png)
+
 This project was created as a hands-on journey to learn the Rust ecosystem, specifically focusing on GUI development with `egui`, high-performance image processing, and local data persistence with SQLite.
 
 > **Note:** This project is currently in a very early stage of development.
